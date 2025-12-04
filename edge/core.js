@@ -1,18 +1,18 @@
 /**
  * Core module for OpenAI-compatible API endpoints
  * This module provides shared functionality for edge/serverless deployments
+ * 
+ * Note: Only deepseek-r1 model is supported in edge deployments.
+ * The ibit model requires BIT authentication which is not suitable for
+ * stateless edge computing environments.
  */
 
-// Model configuration
+// Model configuration - only deepseek-r1 is supported in edge environments
 const MODELS = {
   'deepseek-r1': {
     name: 'DeepSeek-R1',
     owned_by: 'Teclab',
   },
-  'ibit': {
-    name: 'iBit',
-    owned_by: 'Teclab',
-  }
 };
 
 /**
