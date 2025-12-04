@@ -90,26 +90,185 @@ openai_ibit/
 | `models/agent.py` | 智能体广场（agent.bit.edu.cn）的 DeepSeek-R1 模型接口 |
 | `tokenizer/deepseek/deepseek_tokenizer.py` | DeepSeek 模型的分词器，用于计算 Token 数量和费用 |
 
-## 食用方法
+## 环境变量配置
+
+本项目支持以下环境变量配置：
+
+| 环境变量名 | 必需 | 默认值 | 说明 |
+|-----------|------|--------|------|
+| `BIT_USERNAME` | 是* | `""` | 北理工统一身份认证用户名，用于 iBit 平台登录 |
+| `BIT_PASSWORD` | 是* | `""` | 北理工统一身份认证密码，用于 iBit 平台登录 |
+| `AGENT_APP_KEY` | 是* | `""` | 智能体广场应用密钥，用于 DeepSeek-R1 模型 |
+| `AGENT_VISITOR_KEY` | 是* | `""` | 智能体广场访客密钥，用于 DeepSeek-R1 模型 |
+| `API_KEY` | 否 | `""` | API 访问密钥，设置后客户端需在请求头中携带 `Authorization: Bearer <API_KEY>` |
+| `PRINT_STATISTICS_INTERVAL` | 否 | `30` | 统计信息打印间隔（秒），控制控制台输出调用统计的频率 |
+| `TZ` | 否 | 系统默认 | 时区设置，推荐设置为 `Asia/Shanghai` |
+
+> **注意**：标记为 `是*` 的环境变量表示至少需要配置一组模型凭证：
+> - **iBit 模型**：需要同时设置 `BIT_USERNAME` 和 `BIT_PASSWORD`
+> - **DeepSeek-R1 模型**：需要同时设置 `AGENT_APP_KEY` 和 `AGENT_VISITOR_KEY`
+> 
+> 如果两组凭证都未配置，程序启动时会报错。
+
+## 部署方法
+
+### 方式一：Docker 部署（推荐）
+
+#### 1. 仅使用 iBit 模型
+
 ```bash
-# 不需要验证的情况
 docker run -d -p 8000:8000 --name OpeniBIT \
-    -e BIT_USERNAME=统一身份验证用户名 \
-    -e BIT_PASSWORD=统一身份验证密码 \
-    -e TZ=Asia/Shanghai \
-    yht0511/open_ibit:latest
-# 需要设置api_key
-docker run -d -p 8000:8000 --name OpeniBIT \
-    -e BIT_USERNAME=统一身份验证用户名 \
-    -e BIT_PASSWORD=统一身份验证密码 \
-    -e API_KEY=你想设置的api_key \
+    -e BIT_USERNAME=你的统一身份认证用户名 \
+    -e BIT_PASSWORD=你的统一身份认证密码 \
     -e TZ=Asia/Shanghai \
     yht0511/open_ibit:latest
 ```
 
-现在,你已经获得了一个免费的ds接口!你现在可以使用openai等库对接该接口,或是简单地使用nextchat: 在设置里填入接口地址和api_key(没有设置则随便输入)即可享用!
+#### 2. 仅使用智能体广场 DeepSeek-R1 模型
 
+```bash
+docker run -d -p 8000:8000 --name OpeniBIT \
+    -e AGENT_APP_KEY=你的应用密钥 \
+    -e AGENT_VISITOR_KEY=你的访客密钥 \
+    -e TZ=Asia/Shanghai \
+    yht0511/open_ibit:latest
+```
 
-## 2025.6.8更新
-现在支持智能体广场的模型,设置环境变量`AGENT_APP_KEY`和`AGENT_VISITOR_KEY`即可使用。
-默认模型名称:"deepseek-r1",ibit模型名称:"ibit"。
+#### 3. 同时使用两个模型
+
+```bash
+docker run -d -p 8000:8000 --name OpeniBIT \
+    -e BIT_USERNAME=你的统一身份认证用户名 \
+    -e BIT_PASSWORD=你的统一身份认证密码 \
+    -e AGENT_APP_KEY=你的应用密钥 \
+    -e AGENT_VISITOR_KEY=你的访客密钥 \
+    -e TZ=Asia/Shanghai \
+    yht0511/open_ibit:latest
+```
+
+#### 4. 启用 API 密钥保护
+
+```bash
+docker run -d -p 8000:8000 --name OpeniBIT \
+    -e BIT_USERNAME=你的统一身份认证用户名 \
+    -e BIT_PASSWORD=你的统一身份认证密码 \
+    -e API_KEY=你想设置的api密钥 \
+    -e TZ=Asia/Shanghai \
+    yht0511/open_ibit:latest
+```
+
+#### 5. 完整配置示例
+
+```bash
+docker run -d -p 8000:8000 --name OpeniBIT \
+    -e BIT_USERNAME=你的统一身份认证用户名 \
+    -e BIT_PASSWORD=你的统一身份认证密码 \
+    -e AGENT_APP_KEY=你的应用密钥 \
+    -e AGENT_VISITOR_KEY=你的访客密钥 \
+    -e API_KEY=你想设置的api密钥 \
+    -e PRINT_STATISTICS_INTERVAL=60 \
+    -e TZ=Asia/Shanghai \
+    yht0511/open_ibit:latest
+```
+
+### 方式二：Docker Compose 部署
+
+创建 `docker-compose.yml` 文件：
+
+```yaml
+version: '3'
+services:
+  openibit:
+    image: yht0511/open_ibit:latest
+    container_name: OpeniBIT
+    ports:
+      - "8000:8000"
+    environment:
+      - BIT_USERNAME=你的统一身份认证用户名
+      - BIT_PASSWORD=你的统一身份认证密码
+      - AGENT_APP_KEY=你的应用密钥          # 可选
+      - AGENT_VISITOR_KEY=你的访客密钥      # 可选
+      - API_KEY=你想设置的api密钥           # 可选
+      - PRINT_STATISTICS_INTERVAL=30        # 可选
+      - TZ=Asia/Shanghai
+    restart: unless-stopped
+```
+
+启动服务：
+```bash
+docker-compose up -d
+```
+
+### 方式三：本地运行
+
+1. 克隆仓库并安装依赖：
+```bash
+git clone https://github.com/Bigzhangbig/openai_ibit.git
+cd openai_ibit
+pip install -r requirements.txt
+```
+
+2. 设置环境变量：
+```bash
+export BIT_USERNAME=你的统一身份认证用户名
+export BIT_PASSWORD=你的统一身份认证密码
+export API_KEY=你想设置的api密钥  # 可选
+```
+
+3. 启动服务：
+```bash
+python server.py
+```
+
+## API 使用说明
+
+服务启动后，你可以通过以下方式访问：
+
+- **API 地址**：`http://localhost:8000`
+- **模型列表端点**：`GET /v1/models`
+- **对话补全端点**：`POST /v1/chat/completions`
+
+### 可用模型
+
+| 模型名称 | 说明 | 所需环境变量 |
+|---------|------|-------------|
+| `ibit` | iBit 平台 DeepSeek 模型 | `BIT_USERNAME`, `BIT_PASSWORD` |
+| `deepseek-r1` | 智能体广场 DeepSeek-R1 模型 | `AGENT_APP_KEY`, `AGENT_VISITOR_KEY` |
+
+### 客户端对接示例
+
+#### Python OpenAI SDK
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="你设置的API_KEY",  # 如果未设置 API_KEY，可以填任意值
+    base_url="http://localhost:8000/v1"
+)
+
+response = client.chat.completions.create(
+    model="ibit",  # 或 "deepseek-r1"
+    messages=[
+        {"role": "user", "content": "你好"}
+    ],
+    stream=True  # 支持流式输出
+)
+
+for chunk in response:
+    print(chunk.choices[0].delta.content, end="")
+```
+
+#### NextChat / ChatGPT-Next-Web
+
+1. 打开 NextChat 设置
+2. 在 API 设置中填入：
+   - **API 地址**：`http://localhost:8000`（或你的服务器地址）
+   - **API Key**：你设置的 `API_KEY`（未设置则随意填写）
+3. 选择模型 `ibit` 或 `deepseek-r1`
+
+## 更新日志
+
+### 2025.6.8
+现在支持智能体广场的模型，设置环境变量 `AGENT_APP_KEY` 和 `AGENT_VISITOR_KEY` 即可使用。
+- 默认模型名称：`deepseek-r1`
+- iBit 模型名称：`ibit`
