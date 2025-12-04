@@ -268,7 +268,42 @@ for chunk in response:
 
 ## 更新日志
 
-### 2025.6.8
-现在支持智能体广场的模型，设置环境变量 `AGENT_APP_KEY` 和 `AGENT_VISITOR_KEY` 即可使用。
-- 默认模型名称：`deepseek-r1`
-- iBit 模型名称：`ibit`
+## 2025.6.8更新
+现在支持智能体广场的模型,设置环境变量`AGENT_APP_KEY`和`AGENT_VISITOR_KEY`即可使用。
+默认模型名称:"deepseek-r1",ibit模型名称:"ibit"。
+
+## Edge/Serverless 部署
+
+除了 Docker 部署方式，本项目还支持部署到各种边缘计算/无服务器平台：
+
+- **Cloudflare Workers** - 全球边缘节点，延迟低
+- **Deno Deploy** - TypeScript 原生支持
+- **Vercel Edge Functions** - 与 Vercel 生态深度集成
+- **Netlify Edge Functions** - 简单易用
+
+详细部署说明请参考 [Edge/Serverless 部署指南](EDGE_DEPLOYMENT.md)。
+
+### 快速开始 (以 Cloudflare Workers 为例)
+
+```bash
+# 1. 安装 Wrangler
+npm install -g wrangler
+
+# 2. 登录
+wrangler login
+
+# 3. 复制文件
+cd edge
+cp cloudflare-worker.js your-project/
+cp wrangler.toml your-project/
+cd your-project
+
+# 4. 设置密钥
+wrangler secret put AGENT_APP_KEY
+wrangler secret put AGENT_VISITOR_KEY
+
+# 5. 部署
+wrangler deploy
+```
+
+部署完成后即可获得一个免费的 API 端点！
