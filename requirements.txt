@@ -2,7 +2,7 @@ bit_login==2.0.0
 fastapi==0.115.12
 openai==1.84.0
 pydantic==2.11.5
-Requests==2.32.3
+Requests==2.33.0
 sse_starlette==2.2.1
-transformers==4.41.2
+transformers==5.5.0
 uvicorn==0.34.3
